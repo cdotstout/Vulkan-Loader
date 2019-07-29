@@ -240,7 +240,7 @@ void *loader_device_heap_realloc(const struct loader_device *device, void *pMemo
 }
 
 // Environment variables
-#if defined(__linux__) || defined(__APPLE__)
+#if defined(__linux__) || defined(__APPLE__) || defined(__Fuchsia__)
 
 static inline char *loader_getenv(const char *name, const struct loader_instance *inst) {
     // No allocation of memory necessary for Linux, but we should at least touch
@@ -259,6 +259,8 @@ static inline char *loader_secure_getenv(const char *name, const struct loader_i
     // This algorithm is derived from glibc code that sets an internal
     // variable (__libc_enable_secure) if the process is running under setuid or setgid.
     return geteuid() != getuid() || getegid() != getgid() ? NULL : loader_getenv(name, inst);
+#elif defined(__Fuchsia__)
+    return loader_getenv(name, inst);
 #else
 // Linux
 #ifdef HAVE_SECURE_GETENV
@@ -2116,7 +2118,7 @@ static VkResult loader_scanned_icd_add(const struct loader_instance *inst, struc
 
     // TODO implement smarter opening/closing of libraries. For now this
     // function leaves libraries open and the scanned_icd_clear closes them
-    handle = loader_platform_open_library(filename);
+    handle = loader_platform_open_library_or_driver(filename, true);
     if (NULL == handle) {
         loader_log(inst, VK_DEBUG_REPORT_ERROR_BIT_EXT, 0, loader_platform_open_library_error(filename));
         goto out;
@@ -3632,12 +3634,14 @@ static VkResult ReadDataFilesInSearchPaths(const struct loader_instance *inst, e
     if (xdgdatadirs == NULL) {
         xdgdata_alloc = false;
     }
+#if !defined(__Fuchsia__)    
     if (xdgconfdirs == NULL || xdgconfdirs[0] == '\0') {
         xdgconfdirs = FALLBACK_CONFIG_DIRS;
     }
     if (xdgdatadirs == NULL || xdgdatadirs[0] == '\0') {
         xdgdatadirs = FALLBACK_DATA_DIRS;
     }
+#endif
 
     // Only use HOME if XDG_DATA_HOME is not present on the system
     if (NULL == xdgdatahome) {

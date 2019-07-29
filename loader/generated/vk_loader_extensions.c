@@ -2983,28 +2983,6 @@ VKAPI_ATTR void VKAPI_CALL SetLocalDimmingAMD(
 }
 
 
-// ---- VK_FUCHSIA_imagepipe_surface extension trampoline/terminators
-
-#ifdef VK_USE_PLATFORM_FUCHSIA
-VKAPI_ATTR VkResult VKAPI_CALL CreateImagePipeSurfaceFUCHSIA(
-    VkInstance                                  instance,
-    const VkImagePipeSurfaceCreateInfoFUCHSIA*  pCreateInfo,
-    const VkAllocationCallbacks*                pAllocator,
-    VkSurfaceKHR*                               pSurface) {
-#error("Not implemented. Likely needs to be manually generated!");
-    return disp->CreateImagePipeSurfaceFUCHSIA(instance, pCreateInfo, pAllocator, pSurface);
-}
-
-VKAPI_ATTR VkResult VKAPI_CALL terminator_CreateImagePipeSurfaceFUCHSIA(
-    VkInstance                                  instance,
-    const VkImagePipeSurfaceCreateInfoFUCHSIA*  pCreateInfo,
-    const VkAllocationCallbacks*                pAllocator,
-    VkSurfaceKHR*                               pSurface) {
-#error("Not implemented. Likely needs to be manually generated!");
-}
-
-#endif // VK_USE_PLATFORM_FUCHSIA
-
 // ---- VK_EXT_metal_surface extension trampoline/terminators
 
 #ifdef VK_USE_PLATFORM_METAL_EXT
@@ -3898,16 +3876,6 @@ bool extension_instance_gpa(struct loader_instance *ptr_instance, const char *na
         return true;
     }
 
-    // ---- VK_FUCHSIA_imagepipe_surface extension commands
-#ifdef VK_USE_PLATFORM_FUCHSIA
-    if (!strcmp("vkCreateImagePipeSurfaceFUCHSIA", name)) {
-        *addr = (ptr_instance->enabled_known_extensions.fuchsia_imagepipe_surface == 1)
-                     ? (void *)CreateImagePipeSurfaceFUCHSIA
-                     : NULL;
-        return true;
-    }
-#endif // VK_USE_PLATFORM_FUCHSIA
-
     // ---- VK_EXT_metal_surface extension commands
 #ifdef VK_USE_PLATFORM_METAL_EXT
     if (!strcmp("vkCreateMetalSurfaceEXT", name)) {
@@ -4031,12 +3999,6 @@ void extensions_create_instance(struct loader_instance *ptr_instance, const VkIn
     // ---- VK_EXT_debug_utils extension commands
         } else if (0 == strcmp(pCreateInfo->ppEnabledExtensionNames[i], VK_EXT_DEBUG_UTILS_EXTENSION_NAME)) {
             ptr_instance->enabled_known_extensions.ext_debug_utils = 1;
-
-    // ---- VK_FUCHSIA_imagepipe_surface extension commands
-#ifdef VK_USE_PLATFORM_FUCHSIA
-        } else if (0 == strcmp(pCreateInfo->ppEnabledExtensionNames[i], VK_FUCHSIA_IMAGEPIPE_SURFACE_EXTENSION_NAME)) {
-            ptr_instance->enabled_known_extensions.fuchsia_imagepipe_surface = 1;
-#endif // VK_USE_PLATFORM_FUCHSIA
 
     // ---- VK_EXT_metal_surface extension commands
 #ifdef VK_USE_PLATFORM_METAL_EXT

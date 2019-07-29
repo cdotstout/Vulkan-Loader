@@ -1731,6 +1731,83 @@ VKAPI_ATTR VkResult VKAPI_CALL terminator_GetDisplayPlaneCapabilities2KHR(VkPhys
                                                              pDisplayPlaneInfo->planeIndex, &pCapabilities->capabilities);
 }
 
+#ifdef VK_USE_PLATFORM_FUCHSIA
+
+// This is the trampoline entrypoint for CreateImagePipeSurfaceFUCHSIA
+LOADER_EXPORT VKAPI_ATTR VkResult VKAPI_CALL vkCreateImagePipeSurfaceFUCHSIA(VkInstance instance,
+                                                                     const VkImagePipeSurfaceCreateInfoFUCHSIA *pCreateInfo,
+                                                                     const VkAllocationCallbacks *pAllocator,
+                                                                     VkSurfaceKHR *pSurface) {
+    const VkLayerInstanceDispatchTable *disp;
+    disp = loader_get_instance_layer_dispatch(instance);
+    VkResult res;
+
+    res = disp->CreateImagePipeSurfaceFUCHSIA(instance, pCreateInfo, pAllocator, pSurface);
+    return res;
+}
+
+// This is the instance chain terminator function for CreateImagePipeSurfaceFUCHSIA
+VKAPI_ATTR VkResult VKAPI_CALL terminator_CreateImagePipeSurfaceFUCHSIA(VkInstance instance, const VkImagePipeSurfaceCreateInfoFUCHSIA *pCreateInfo,
+                                                                const VkAllocationCallbacks *pAllocator, VkSurfaceKHR *pSurface) {
+    VkResult vkRes = VK_SUCCESS;
+    VkIcdSurface *pIcdSurface = NULL;
+    uint32_t i = 0;
+
+    // Initialize pSurface to NULL just to be safe.
+    *pSurface = VK_NULL_HANDLE;
+    // First, check to ensure the appropriate extension was enabled:
+    struct loader_instance *ptr_instance = loader_get_instance(instance);
+    if (!ptr_instance->wsi_imagepipe_surface_enabled) {
+        loader_log(ptr_instance, VK_DEBUG_REPORT_ERROR_BIT_EXT, 0,
+                   "VK_FUCHSIA_imagepipe_surface extension not enabled.  "
+                   "vkCreateImagePipeSurfaceFUCHSIA not executed!\n");
+        vkRes = VK_ERROR_EXTENSION_NOT_PRESENT;
+        goto out;
+    }
+
+    // Next, if so, proceed with the implementation of this function:
+    pIcdSurface = AllocateIcdSurfaceStruct(ptr_instance, sizeof(pIcdSurface->imagepipe_surf.base), sizeof(pIcdSurface->imagepipe_surf));
+    if (pIcdSurface == NULL) {
+        vkRes = VK_ERROR_OUT_OF_HOST_MEMORY;
+        goto out;
+    }
+
+    pIcdSurface->imagepipe_surf.base.platform = VK_ICD_WSI_PLATFORM_FUCHSIA;
+
+    // Loop through each ICD and determine if they need to create a surface
+    for (struct loader_icd_term *icd_term = ptr_instance->icd_terms; icd_term != NULL; icd_term = icd_term->next, i++) {
+        if (icd_term->scanned_icd->interface_version >= ICD_VER_SUPPORTS_ICD_SURFACE_KHR) {
+            if (NULL != icd_term->dispatch.CreateImagePipeSurfaceFUCHSIA) {
+                vkRes = icd_term->dispatch.CreateImagePipeSurfaceFUCHSIA(icd_term->instance, pCreateInfo, pAllocator,
+                                                                 &pIcdSurface->real_icd_surfaces[i]);
+                if (VK_SUCCESS != vkRes) {
+                    goto out;
+                }
+            }
+        }
+    }
+
+    *pSurface = (VkSurfaceKHR)(pIcdSurface);
+
+out:
+
+    if (VK_SUCCESS != vkRes && NULL != pIcdSurface) {
+        if (NULL != pIcdSurface->real_icd_surfaces) {
+            i = 0;
+            for (struct loader_icd_term *icd_term = ptr_instance->icd_terms; icd_term != NULL; icd_term = icd_term->next, i++) {
+                if ((VkSurfaceKHR)NULL != pIcdSurface->real_icd_surfaces[i] && NULL != icd_term->dispatch.DestroySurfaceKHR) {
+                    icd_term->dispatch.DestroySurfaceKHR(icd_term->instance, pIcdSurface->real_icd_surfaces[i], pAllocator);
+                }
+            }
+            loader_instance_heap_free(ptr_instance, pIcdSurface->real_icd_surfaces);
+        }
+        loader_instance_heap_free(ptr_instance, pIcdSurface);
+    }
+
+    return vkRes;
+}
+#endif  // VK_USE_PLATFORM_FUCHSIA
+
 bool wsi_swapchain_instance_gpa(struct loader_instance *ptr_instance, const char *name, void **addr) {
     *addr = NULL;
 

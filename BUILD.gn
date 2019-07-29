@@ -13,11 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build_overrides/build.gni")
 import("//build_overrides/vulkan_loader.gni")
 
-# Fuchsia has non-upstream changes to the vulkan loader, so we don't want
-# to build it from upstream sources.
-assert(!is_fuchsia)
+if (is_fuchsia) {
+  import("//build/cpp/sdk_shared_library.gni")
+  import("//build/sdk/sdk_documentation.gni")
+}
 
 if (!is_android) {
   vulkan_undefine_configs = []
@@ -33,6 +35,12 @@ config("vulkan_internal_config") {
   defines = [ "VULKAN_NON_CMAKE_BUILD" ]
   if (is_clang || !is_win) {
     cflags = [ "-Wno-unused-function" ]
+  }
+  if (is_fuchsia) {
+    defines += [
+      "SYSCONFDIR=\"/config\"",
+      "EXTRASYSCONFDIR=\"/pkg/data\"",
+    ]
   }
   if (is_linux) {
     defines += [
@@ -63,7 +71,9 @@ config("vulkan_loader_config") {
 }
 
 if (!is_android) {
-  if (vulkan_loader_shared) {
+  if (is_fuchsia) {
+    library_type = "sdk_shared_library"
+  } else if (vulkan_loader_shared) {
     library_type = "shared_library"
   } else {
     library_type = "static_library"
@@ -113,13 +123,85 @@ if (!is_android) {
         ]
       }
     }
+    if (build_with_chromium) {
+      configs -= [ "//build/config/compiler:chromium_code" ]
+      configs += [ "//build/config/compiler:no_chromium_code" ]
+    }
     public_deps = [
       "$vulkan_headers_dir:vulkan_headers",
     ]
-    configs -= [ "//build/config/compiler:chromium_code" ]
-    configs += [ "//build/config/compiler:no_chromium_code" ]
     configs += [ ":vulkan_internal_config" ]
     public_configs = [ ":vulkan_loader_config" ]
     configs -= vulkan_undefine_configs
+
+    if (is_fuchsia) {
+      output_name = "vulkan"
+      category = "partner"
+
+      # The Vulkan loader's interface is defined by standard Khronos vulkan headers
+      # which can be obtained separately from the loader implementation itself.
+      no_headers = true
+
+      deps = [
+        ":dlopen_fuchsia",
+      ]
+
+      # TODO(MA-488) - while these shared libraries are needed by vulkan icd
+      # the app must provide them, so we add the deps here.
+      deps += [ "//zircon/public/lib/trace-engine" ]
+      deps += [ "//zircon/public/lib/async-default" ]
+
+      libs = [ "zircon" ]
+
+      runtime_deps = [ "//zircon/public/lib/fdio:fdio_sdk" ]
+
+      # TODO(MA-488): remove this too
+      runtime_deps += [ "//zircon/public/lib/trace-engine:trace-engine_sdk" ]
+      runtime_deps += [ "//zircon/public/lib/async-default:async-default_sdk" ]
+
+      # TODO(MA-488): The //zircon/public/lib/async-default dep gives us a dep
+      # on //zircon/public/lib/async, which uses the C++ standard library and
+      # is linked statically (built from source, though async-default is a
+      # prebuilt shared library).  So link in the C++ standard library
+      # statically just to satisfy those references.  When the async-default
+      # dep is dropped, this can change to "none" (i.e. be removed).
+      libcxx_linkage = "static"
+    }
   }
+}
+
+if (is_fuchsia) {
+  config("fuchsia_config") {
+    include_dirs = [ "fuchsia" ]
+  }
+
+  source_set("dlopen_fuchsia") {
+    public_configs = [ ":fuchsia_config" ]
+
+    sources = [
+      "fuchsia/dlopen_fuchsia.c",
+      "fuchsia/dlopen_fuchsia.h",
+    ]
+
+    deps = [
+      "//sdk/fidl/fuchsia.vulkan.loader:fuchsia.vulkan.loader_c_client",
+      "//zircon/public/lib/fdio",
+    ]
+  }
+
+  sdk_documentation("vulkan_license") {
+    name = "vulkan_license"
+    category = "public"
+
+    files = [
+      {
+        source = "LICENSE.txt"
+        dest = "LICENSE.vulkan"
+      },
+    ]
+  }
+}
+
+group("tests") {
+  # TODO(MA-684)
 }
