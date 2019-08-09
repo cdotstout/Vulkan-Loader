@@ -690,6 +690,39 @@ VKAPI_ATTR void VKAPI_CALL loader_init_device_extension_dispatch_table(struct lo
 
     // ---- VK_EXT_host_query_reset extension commands
     table->ResetQueryPoolEXT = (PFN_vkResetQueryPoolEXT)gdpa(dev, "vkResetQueryPoolEXT");
+
+    // ---- VK_FUCHSIA_buffer_collection extension commands
+#ifdef VK_USE_PLATFORM_FUCHSIA
+    table->CreateBufferCollectionFUCHSIA = (PFN_vkCreateBufferCollectionFUCHSIA)gdpa(dev, "vkCreateBufferCollectionFUCHSIA");
+#endif // VK_USE_PLATFORM_FUCHSIA
+#ifdef VK_USE_PLATFORM_FUCHSIA
+    table->SetBufferCollectionConstraintsFUCHSIA = (PFN_vkSetBufferCollectionConstraintsFUCHSIA)gdpa(dev, "vkSetBufferCollectionConstraintsFUCHSIA");
+#endif // VK_USE_PLATFORM_FUCHSIA
+#ifdef VK_USE_PLATFORM_FUCHSIA
+    table->SetBufferCollectionBufferConstraintsFUCHSIA = (PFN_vkSetBufferCollectionBufferConstraintsFUCHSIA)gdpa(dev, "vkSetBufferCollectionBufferConstraintsFUCHSIA");
+#endif // VK_USE_PLATFORM_FUCHSIA
+#ifdef VK_USE_PLATFORM_FUCHSIA
+    table->DestroyBufferCollectionFUCHSIA = (PFN_vkDestroyBufferCollectionFUCHSIA)gdpa(dev, "vkDestroyBufferCollectionFUCHSIA");
+#endif // VK_USE_PLATFORM_FUCHSIA
+#ifdef VK_USE_PLATFORM_FUCHSIA
+    table->GetBufferCollectionPropertiesFUCHSIA = (PFN_vkGetBufferCollectionPropertiesFUCHSIA)gdpa(dev, "vkGetBufferCollectionPropertiesFUCHSIA");
+#endif // VK_USE_PLATFORM_FUCHSIA
+
+    // ---- VK_FUCHSIA_external_memory extension commands
+#ifdef VK_USE_PLATFORM_FUCHSIA
+    table->GetMemoryZirconHandleFUCHSIA = (PFN_vkGetMemoryZirconHandleFUCHSIA)gdpa(dev, "vkGetMemoryZirconHandleFUCHSIA");
+#endif // VK_USE_PLATFORM_FUCHSIA
+#ifdef VK_USE_PLATFORM_FUCHSIA
+    table->GetMemoryZirconHandlePropertiesFUCHSIA = (PFN_vkGetMemoryZirconHandlePropertiesFUCHSIA)gdpa(dev, "vkGetMemoryZirconHandlePropertiesFUCHSIA");
+#endif // VK_USE_PLATFORM_FUCHSIA
+
+    // ---- VK_FUCHSIA_external_semaphore extension commands
+#ifdef VK_USE_PLATFORM_FUCHSIA
+    table->ImportSemaphoreZirconHandleFUCHSIA = (PFN_vkImportSemaphoreZirconHandleFUCHSIA)gdpa(dev, "vkImportSemaphoreZirconHandleFUCHSIA");
+#endif // VK_USE_PLATFORM_FUCHSIA
+#ifdef VK_USE_PLATFORM_FUCHSIA
+    table->GetSemaphoreZirconHandleFUCHSIA = (PFN_vkGetSemaphoreZirconHandleFUCHSIA)gdpa(dev, "vkGetSemaphoreZirconHandleFUCHSIA");
+#endif // VK_USE_PLATFORM_FUCHSIA
 }
 
 // Init Instance function pointer dispatch table with core commands
@@ -1301,6 +1334,39 @@ VKAPI_ATTR void* VKAPI_CALL loader_lookup_device_dispatch_table(const VkLayerDis
 
     // ---- VK_EXT_host_query_reset extension commands
     if (!strcmp(name, "ResetQueryPoolEXT")) return (void *)table->ResetQueryPoolEXT;
+
+    // ---- VK_FUCHSIA_buffer_collection extension commands
+#ifdef VK_USE_PLATFORM_FUCHSIA
+    if (!strcmp(name, "CreateBufferCollectionFUCHSIA")) return (void *)table->CreateBufferCollectionFUCHSIA;
+#endif // VK_USE_PLATFORM_FUCHSIA
+#ifdef VK_USE_PLATFORM_FUCHSIA
+    if (!strcmp(name, "SetBufferCollectionConstraintsFUCHSIA")) return (void *)table->SetBufferCollectionConstraintsFUCHSIA;
+#endif // VK_USE_PLATFORM_FUCHSIA
+#ifdef VK_USE_PLATFORM_FUCHSIA
+    if (!strcmp(name, "SetBufferCollectionBufferConstraintsFUCHSIA")) return (void *)table->SetBufferCollectionBufferConstraintsFUCHSIA;
+#endif // VK_USE_PLATFORM_FUCHSIA
+#ifdef VK_USE_PLATFORM_FUCHSIA
+    if (!strcmp(name, "DestroyBufferCollectionFUCHSIA")) return (void *)table->DestroyBufferCollectionFUCHSIA;
+#endif // VK_USE_PLATFORM_FUCHSIA
+#ifdef VK_USE_PLATFORM_FUCHSIA
+    if (!strcmp(name, "GetBufferCollectionPropertiesFUCHSIA")) return (void *)table->GetBufferCollectionPropertiesFUCHSIA;
+#endif // VK_USE_PLATFORM_FUCHSIA
+
+    // ---- VK_FUCHSIA_external_memory extension commands
+#ifdef VK_USE_PLATFORM_FUCHSIA
+    if (!strcmp(name, "GetMemoryZirconHandleFUCHSIA")) return (void *)table->GetMemoryZirconHandleFUCHSIA;
+#endif // VK_USE_PLATFORM_FUCHSIA
+#ifdef VK_USE_PLATFORM_FUCHSIA
+    if (!strcmp(name, "GetMemoryZirconHandlePropertiesFUCHSIA")) return (void *)table->GetMemoryZirconHandlePropertiesFUCHSIA;
+#endif // VK_USE_PLATFORM_FUCHSIA
+
+    // ---- VK_FUCHSIA_external_semaphore extension commands
+#ifdef VK_USE_PLATFORM_FUCHSIA
+    if (!strcmp(name, "ImportSemaphoreZirconHandleFUCHSIA")) return (void *)table->ImportSemaphoreZirconHandleFUCHSIA;
+#endif // VK_USE_PLATFORM_FUCHSIA
+#ifdef VK_USE_PLATFORM_FUCHSIA
+    if (!strcmp(name, "GetSemaphoreZirconHandleFUCHSIA")) return (void *)table->GetSemaphoreZirconHandleFUCHSIA;
+#endif // VK_USE_PLATFORM_FUCHSIA
 
     return NULL;
 }
@@ -3099,6 +3165,106 @@ VKAPI_ATTR void VKAPI_CALL ResetQueryPoolEXT(
     disp->ResetQueryPoolEXT(device, queryPool, firstQuery, queryCount);
 }
 
+
+// ---- VK_FUCHSIA_buffer_collection extension trampoline/terminators
+
+#ifdef VK_USE_PLATFORM_FUCHSIA
+VKAPI_ATTR VkResult VKAPI_CALL CreateBufferCollectionFUCHSIA(
+    VkDevice                                    device,
+    const VkBufferCollectionCreateInfoFUCHSIA*  pImportInfo,
+    const VkAllocationCallbacks*                pAllocator,
+    VkBufferCollectionFUCHSIA*                  pCollection) {
+    const VkLayerDispatchTable *disp = loader_get_dispatch(device);
+    return disp->CreateBufferCollectionFUCHSIA(device, pImportInfo, pAllocator, pCollection);
+}
+
+#endif // VK_USE_PLATFORM_FUCHSIA
+#ifdef VK_USE_PLATFORM_FUCHSIA
+VKAPI_ATTR VkResult VKAPI_CALL SetBufferCollectionConstraintsFUCHSIA(
+    VkDevice                                    device,
+    VkBufferCollectionFUCHSIA                   collection,
+    const VkImageCreateInfo*                    pImageInfo) {
+    const VkLayerDispatchTable *disp = loader_get_dispatch(device);
+    return disp->SetBufferCollectionConstraintsFUCHSIA(device, collection, pImageInfo);
+}
+
+#endif // VK_USE_PLATFORM_FUCHSIA
+#ifdef VK_USE_PLATFORM_FUCHSIA
+VKAPI_ATTR VkResult VKAPI_CALL SetBufferCollectionBufferConstraintsFUCHSIA(
+    VkDevice                                    device,
+    VkBufferCollectionFUCHSIA                   collection,
+    const VkBufferConstraintsInfoFUCHSIA*       pBufferConstraintsInfo) {
+    const VkLayerDispatchTable *disp = loader_get_dispatch(device);
+    return disp->SetBufferCollectionBufferConstraintsFUCHSIA(device, collection, pBufferConstraintsInfo);
+}
+
+#endif // VK_USE_PLATFORM_FUCHSIA
+#ifdef VK_USE_PLATFORM_FUCHSIA
+VKAPI_ATTR void VKAPI_CALL DestroyBufferCollectionFUCHSIA(
+    VkDevice                                    device,
+    VkBufferCollectionFUCHSIA                   collection,
+    const VkAllocationCallbacks*                pAllocator) {
+    const VkLayerDispatchTable *disp = loader_get_dispatch(device);
+    disp->DestroyBufferCollectionFUCHSIA(device, collection, pAllocator);
+}
+
+#endif // VK_USE_PLATFORM_FUCHSIA
+#ifdef VK_USE_PLATFORM_FUCHSIA
+VKAPI_ATTR VkResult VKAPI_CALL GetBufferCollectionPropertiesFUCHSIA(
+    VkDevice                                    device,
+    VkBufferCollectionFUCHSIA                   collection,
+    VkBufferCollectionPropertiesFUCHSIA*        pProperties) {
+    const VkLayerDispatchTable *disp = loader_get_dispatch(device);
+    return disp->GetBufferCollectionPropertiesFUCHSIA(device, collection, pProperties);
+}
+
+#endif // VK_USE_PLATFORM_FUCHSIA
+
+// ---- VK_FUCHSIA_external_memory extension trampoline/terminators
+
+#ifdef VK_USE_PLATFORM_FUCHSIA
+VKAPI_ATTR VkResult VKAPI_CALL GetMemoryZirconHandleFUCHSIA(
+    VkDevice                                    device,
+    const VkMemoryGetZirconHandleInfoFUCHSIA*   pGetZirconHandleInfo,
+    zx_handle_t*                                pZirconHandle) {
+    const VkLayerDispatchTable *disp = loader_get_dispatch(device);
+    return disp->GetMemoryZirconHandleFUCHSIA(device, pGetZirconHandleInfo, pZirconHandle);
+}
+
+#endif // VK_USE_PLATFORM_FUCHSIA
+#ifdef VK_USE_PLATFORM_FUCHSIA
+VKAPI_ATTR VkResult VKAPI_CALL GetMemoryZirconHandlePropertiesFUCHSIA(
+    VkDevice                                    device,
+    VkExternalMemoryHandleTypeFlagBits          handleType,
+    zx_handle_t                                 ZirconHandle,
+    VkMemoryZirconHandlePropertiesFUCHSIA*      pMemoryZirconHandleProperties) {
+    const VkLayerDispatchTable *disp = loader_get_dispatch(device);
+    return disp->GetMemoryZirconHandlePropertiesFUCHSIA(device, handleType, ZirconHandle, pMemoryZirconHandleProperties);
+}
+
+#endif // VK_USE_PLATFORM_FUCHSIA
+
+// ---- VK_FUCHSIA_external_semaphore extension trampoline/terminators
+
+#ifdef VK_USE_PLATFORM_FUCHSIA
+VKAPI_ATTR VkResult VKAPI_CALL ImportSemaphoreZirconHandleFUCHSIA(
+    VkDevice                                    device,
+    const VkImportSemaphoreZirconHandleInfoFUCHSIA* pImportSemaphoreZirconHandleInfo) {
+    const VkLayerDispatchTable *disp = loader_get_dispatch(device);
+    return disp->ImportSemaphoreZirconHandleFUCHSIA(device, pImportSemaphoreZirconHandleInfo);
+}
+
+#endif // VK_USE_PLATFORM_FUCHSIA
+#ifdef VK_USE_PLATFORM_FUCHSIA
+VKAPI_ATTR VkResult VKAPI_CALL GetSemaphoreZirconHandleFUCHSIA(
+    VkDevice                                    device,
+    const VkSemaphoreGetZirconHandleInfoFUCHSIA* pGetZirconHandleInfo,
+    zx_handle_t*                                pZirconHandle) {
+    const VkLayerDispatchTable *disp = loader_get_dispatch(device);
+    return disp->GetSemaphoreZirconHandleFUCHSIA(device, pGetZirconHandleInfo, pZirconHandle);
+}
+
+#endif // VK_USE_PLATFORM_FUCHSIA
 // GPA helpers for extensions
 bool extension_instance_gpa(struct loader_instance *ptr_instance, const char *name, void **addr) {
     *addr = NULL;
@@ -3935,6 +4101,66 @@ bool extension_instance_gpa(struct loader_instance *ptr_instance, const char *na
         *addr = (void *)ResetQueryPoolEXT;
         return true;
     }
+
+    // ---- VK_FUCHSIA_buffer_collection extension commands
+#ifdef VK_USE_PLATFORM_FUCHSIA
+    if (!strcmp("vkCreateBufferCollectionFUCHSIA", name)) {
+        *addr = (void *)CreateBufferCollectionFUCHSIA;
+        return true;
+    }
+#endif // VK_USE_PLATFORM_FUCHSIA
+#ifdef VK_USE_PLATFORM_FUCHSIA
+    if (!strcmp("vkSetBufferCollectionConstraintsFUCHSIA", name)) {
+        *addr = (void *)SetBufferCollectionConstraintsFUCHSIA;
+        return true;
+    }
+#endif // VK_USE_PLATFORM_FUCHSIA
+#ifdef VK_USE_PLATFORM_FUCHSIA
+    if (!strcmp("vkSetBufferCollectionBufferConstraintsFUCHSIA", name)) {
+        *addr = (void *)SetBufferCollectionBufferConstraintsFUCHSIA;
+        return true;
+    }
+#endif // VK_USE_PLATFORM_FUCHSIA
+#ifdef VK_USE_PLATFORM_FUCHSIA
+    if (!strcmp("vkDestroyBufferCollectionFUCHSIA", name)) {
+        *addr = (void *)DestroyBufferCollectionFUCHSIA;
+        return true;
+    }
+#endif // VK_USE_PLATFORM_FUCHSIA
+#ifdef VK_USE_PLATFORM_FUCHSIA
+    if (!strcmp("vkGetBufferCollectionPropertiesFUCHSIA", name)) {
+        *addr = (void *)GetBufferCollectionPropertiesFUCHSIA;
+        return true;
+    }
+#endif // VK_USE_PLATFORM_FUCHSIA
+
+    // ---- VK_FUCHSIA_external_memory extension commands
+#ifdef VK_USE_PLATFORM_FUCHSIA
+    if (!strcmp("vkGetMemoryZirconHandleFUCHSIA", name)) {
+        *addr = (void *)GetMemoryZirconHandleFUCHSIA;
+        return true;
+    }
+#endif // VK_USE_PLATFORM_FUCHSIA
+#ifdef VK_USE_PLATFORM_FUCHSIA
+    if (!strcmp("vkGetMemoryZirconHandlePropertiesFUCHSIA", name)) {
+        *addr = (void *)GetMemoryZirconHandlePropertiesFUCHSIA;
+        return true;
+    }
+#endif // VK_USE_PLATFORM_FUCHSIA
+
+    // ---- VK_FUCHSIA_external_semaphore extension commands
+#ifdef VK_USE_PLATFORM_FUCHSIA
+    if (!strcmp("vkImportSemaphoreZirconHandleFUCHSIA", name)) {
+        *addr = (void *)ImportSemaphoreZirconHandleFUCHSIA;
+        return true;
+    }
+#endif // VK_USE_PLATFORM_FUCHSIA
+#ifdef VK_USE_PLATFORM_FUCHSIA
+    if (!strcmp("vkGetSemaphoreZirconHandleFUCHSIA", name)) {
+        *addr = (void *)GetSemaphoreZirconHandleFUCHSIA;
+        return true;
+    }
+#endif // VK_USE_PLATFORM_FUCHSIA
     return false;
 }
 
@@ -4056,7 +4282,7 @@ PFN_vkVoidFunction get_extension_device_proc_terminator(struct loader_device *de
             addr = (PFN_vkVoidFunction)terminator_GetDeviceGroupSurfacePresentModes2EXT;
         }
     }
-#endif // None
+#endif // VK_USE_PLATFORM_FUCHSIA
     return addr;
 }
 
