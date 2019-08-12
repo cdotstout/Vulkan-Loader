@@ -58,7 +58,7 @@ This scheme was adopted following the 1.1.96 Vulkan specification release.
 This work is released as open source under a Apache-style license from Khronos
 including a Khronos copyright.
 
-See COPYRIGHT.txt for a full list of licenses used in this repository.
+See LICENSE.txt for a full list of licenses used in this repository.
 
 ## Acknowledgements
 
