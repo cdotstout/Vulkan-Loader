@@ -4307,7 +4307,6 @@ out:
 static VkResult ReadDataFilesInRegistry(const struct loader_instance *inst, enum loader_data_files_type data_file_type,
                                         bool warn_if_not_present, char *registry_location, struct loader_data_files *out_files) {
     VkResult vk_result = VK_SUCCESS;
-    bool is_icd = (data_file_type == LOADER_DATA_FILE_MANIFEST_ICD);
     char *search_path = NULL;
 
     // These calls look at the PNP/Device section of the registry.
